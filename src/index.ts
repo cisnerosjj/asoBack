@@ -12,8 +12,22 @@ dotenv.config();
 const app = express();
 
 // Configuración de CORS
+const allowedOrigins = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+  : ['http://localhost:5173'];
+
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // Permitir requests sin origin (como Postman, apps móviles, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Verificar si el origin está en la lista o si termina con .vercel.app
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200,
 };
