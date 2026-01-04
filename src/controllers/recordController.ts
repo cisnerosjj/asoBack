@@ -8,7 +8,7 @@ import { AuthRequest } from '../middleware/auth';
 
 // Crear nuevo registro (funcionalidad principal del formulario)
 export const createRecord = catchAsync(async (req: Request, res: Response) => {
-  const { partner: partnerId, product: productId, quantity } = req.body;
+  const { partner: partnerId, product: productIdentifier, quantity } = req.body;
   const employeeId = (req as AuthRequest).user?.employeeId;
 
   // Validar que haya un empleado autenticado
@@ -28,10 +28,22 @@ export const createRecord = catchAsync(async (req: Request, res: Response) => {
     return sendError(res, 404, 'Socio no encontrado o inactivo');
   }
 
-  // Validar que el producto existe y está activo
-  const product = await Product.findOne({ _id: productId, active: true });
+  // Buscar producto por ID o por nombre
+  let product;
+  
+  // Verificar si productIdentifier es un ObjectId válido
+  const mongoose = require('mongoose');
+  if (mongoose.Types.ObjectId.isValid(productIdentifier)) {
+    product = await Product.findOne({ _id: productIdentifier, active: true });
+  }
+  
+  // Si no se encontró por ID, buscar por nombre
   if (!product) {
-    return sendError(res, 404, 'Producto no encontrado o inactivo');
+    product = await Product.findOne({ name: productIdentifier, active: true });
+  }
+  
+  if (!product) {
+    return sendError(res, 404, `Producto "${productIdentifier}" no encontrado o inactivo`);
   }
 
   // Calcular créditos totales
@@ -41,7 +53,7 @@ export const createRecord = catchAsync(async (req: Request, res: Response) => {
   const recordData = {
     partner: partnerId,
     partnerName: partner.name,
-    product: productId,
+    product: product._id,
     productName: product.name,
     employee: employeeId,
     employeeName: employee.name,

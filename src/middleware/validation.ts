@@ -38,7 +38,7 @@ export const updateProductSchema = z.object({
 // Schema para crear registro (funcionalidad principal)
 export const createRecordSchema = z.object({
   partner: z.string().regex(/^[0-9a-fA-F]{24}$/, 'ID de socio inválido'),
-  product: z.string().regex(/^[0-9a-fA-F]{24}$/, 'ID de producto inválido'),
+  product: z.string().min(1, 'El producto es requerido'), // Aceptar nombre o ID
   quantity: z.number().min(1, 'La cantidad debe ser mayor a 0').max(1000),
 });
 

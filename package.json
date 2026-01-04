@@ -8,6 +8,7 @@
     "start": "node dist/index.js",
     "type-check": "tsc --noEmit",
     "seed": "ts-node src/seed.ts",
+    "seed:products": "ts-node src/scripts/seedProducts.ts",
     "migrate:employees": "ts-node src/migrations/migrateEmployees.ts",
     "create:admin": "ts-node src/scripts/createAdminUsers.ts"
   },

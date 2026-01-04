@@ -13,9 +13,13 @@ import {
   createRecordSchema,
   paginationSchema,
 } from '../middleware/validation';
+import { authenticate } from '../middleware/auth';
 import { z } from 'zod';
 
 const router = express.Router();
+
+// Aplicar autenticación a todas las rutas de records
+router.use(authenticate);
 
 // Schema para validar ID de MongoDB
 const mongoIdSchema = z.object({
