@@ -3,7 +3,11 @@ import mongoose, { Document, Schema } from 'mongoose';
 // Interface TypeScript para Registro
 export interface IRecord extends Document {
   partner: mongoose.Types.ObjectId;
+  partnerName: string;
   product: mongoose.Types.ObjectId;
+  productName: string;
+  employee: mongoose.Types.ObjectId;
+  employeeName: string;
   quantity: number;
   totalCredits: number;
   createdAt: Date;
@@ -18,10 +22,30 @@ const recordSchema = new Schema<IRecord>(
       ref: 'Partner',
       required: [true, 'El socio es requerido'],
     },
+    partnerName: {
+      type: String,
+      required: [true, 'El nombre del socio es requerido'],
+      trim: true,
+    },
     product: {
       type: Schema.Types.ObjectId,
       ref: 'Product',
       required: [true, 'El producto es requerido'],
+    },
+    productName: {
+      type: String,
+      required: [true, 'El nombre del producto es requerido'],
+      trim: true,
+    },
+    employee: {
+      type: Schema.Types.ObjectId,
+      ref: 'Employee',
+      required: [true, 'El empleado es requerido'],
+    },
+    employeeName: {
+      type: String,
+      required: [true, 'El nombre del empleado es requerido'],
+      trim: true,
     },
     quantity: {
       type: Number,
@@ -45,7 +69,9 @@ const recordSchema = new Schema<IRecord>(
 // Índices para búsquedas optimizadas
 recordSchema.index({ partner: 1, createdAt: -1 });
 recordSchema.index({ product: 1, createdAt: -1 });
+recordSchema.index({ employee: 1, createdAt: -1 });
 recordSchema.index({ createdAt: -1 });
+recordSchema.index({ partnerName: 'text', productName: 'text', employeeName: 'text' });
 
 // Virtual para popular datos relacionados
 recordSchema.virtual('partnerDetails', {

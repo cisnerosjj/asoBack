@@ -1,0 +1,30 @@
+{
+  "usuarios_creados": [
+    {
+      "nombre": "Administrador",
+      "username": "admin",
+      "password": "admin123",
+      "rol": "admin",
+      "descripcion": "Usuario administrador estándar con permisos completos para gestionar depósitos, socios, productos y empleados"
+    },
+    {
+      "nombre": "Super Administrador",
+      "username": "superadmin",
+      "password": "super123",
+      "rol": "super-admin",
+      "descripcion": "Usuario super administrador con permisos completos del sistema, incluyendo gestión de otros administradores"
+    }
+  ],
+  "notas": [
+    "Los usuarios han sido creados en la base de datos MongoDB",
+    "Puedes iniciar sesión con cualquiera de estos usuarios",
+    "Las contraseñas están hasheadas con bcrypt en la base de datos",
+    "Para crear nuevos usuarios o modificar estos, ejecuta: npm run create:admin"
+  ],
+  "comandos_utiles": {
+    "crear_usuarios": "npm run create:admin",
+    "migrar_empleados": "npm run migrate:employees",
+    "iniciar_backend": "npm run dev",
+    "iniciar_frontend": "cd ../frontend && npm run dev"
+  }
+}

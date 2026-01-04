@@ -10,12 +10,15 @@ export const searchPartners = catchAsync(async (req: Request, res: Response) => 
     return sendError(res, 400, 'Parámetro de búsqueda requerido');
   }
 
-  // Búsqueda por nombre con regex (case-insensitive)
+  // Búsqueda por nombre o nickname con regex (case-insensitive)
   const partners = await Partner.find({
-    name: { $regex: search, $options: 'i' },
+    $or: [
+      { name: { $regex: search, $options: 'i' } },
+      { nickname: { $regex: search, $options: 'i' } }
+    ],
     active: true,
   })
-    .select('_id name email')
+    .select('_id name nickname email dni passport type createdAt')
     .limit(10)
     .sort({ name: 1 });
 
@@ -25,7 +28,7 @@ export const searchPartners = catchAsync(async (req: Request, res: Response) => 
 // Obtener todos los socios
 export const getAllPartners = catchAsync(async (req: Request, res: Response) => {
   const partners = await Partner.find({ active: true })
-    .select('_id name email createdAt')
+    .select('_id name nickname email dni passport type createdAt')
     .sort({ name: 1 });
 
   sendResponse(res, 200, 'Lista de socios', partners);

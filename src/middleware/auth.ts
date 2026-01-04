@@ -7,8 +7,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'tu-secreto-super-seguro-cambiame';
 // Interface para extender Request con datos de usuario
 export interface AuthRequest extends Request {
   user?: {
-    userId: string;
+    employeeId: string;
     username: string;
+    name: string;
     role: 'admin' | 'super-admin';
   };
 }
@@ -32,12 +33,13 @@ export const authenticate = async (
 
     // Verificar token
     const decoded = jwt.verify(token, JWT_SECRET) as {
-      userId: string;
+      employeeId: string;
       username: string;
+      name: string;
       role: 'admin' | 'super-admin';
     };
 
-    // Añadir datos del usuario a la request
+    // Añadir datos del empleado a la request
     (req as AuthRequest).user = decoded;
 
     next();

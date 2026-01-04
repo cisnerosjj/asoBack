@@ -2,11 +2,25 @@ import { Request, Response } from 'express';
 import { Record } from '../models/Record';
 import { Product } from '../models/Product';
 import { Partner } from '../models/Partner';
+import { Employee } from '../models/Employee';
 import { sendResponse, sendError, catchAsync } from '../utils/apiResponse';
+import { AuthRequest } from '../middleware/auth';
 
 // Crear nuevo registro (funcionalidad principal del formulario)
 export const createRecord = catchAsync(async (req: Request, res: Response) => {
   const { partner: partnerId, product: productId, quantity } = req.body;
+  const employeeId = (req as AuthRequest).user?.employeeId;
+
+  // Validar que haya un empleado autenticado
+  if (!employeeId) {
+    return sendError(res, 401, 'No autenticado');
+  }
+
+  // Validar que el empleado existe y está activo
+  const employee = await Employee.findOne({ _id: employeeId, active: true });
+  if (!employee) {
+    return sendError(res, 404, 'Empleado no encontrado o inactivo');
+  }
 
   // Validar que el socio existe y está activo
   const partner = await Partner.findOne({ _id: partnerId, active: true });
@@ -26,7 +40,11 @@ export const createRecord = catchAsync(async (req: Request, res: Response) => {
   // Crear el registro
   const recordData = {
     partner: partnerId,
+    partnerName: partner.name,
     product: productId,
+    productName: product.name,
+    employee: employeeId,
+    employeeName: employee.name,
     quantity,
     totalCredits,
   };
@@ -37,7 +55,8 @@ export const createRecord = catchAsync(async (req: Request, res: Response) => {
   // Popular los datos relacionados para la respuesta
   const populatedRecord = await Record.findById(savedRecord._id)
     .populate('partner', 'name email')
-    .populate('product', 'name credits');
+    .populate('product', 'name credits')
+    .populate('employee', 'name username');
 
   sendResponse(res, 201, 'Registro creado exitosamente', populatedRecord);
 });
@@ -48,14 +67,31 @@ export const getAllRecords = catchAsync(async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 20;
   const skip = (page - 1) * limit;
 
-  const records = await Record.find()
+  // Filtro por fecha (opcional)
+  const dateFilter = req.query.date as string;
+  let query: any = {};
+
+  if (dateFilter) {
+    const startDate = new Date(dateFilter);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(dateFilter);
+    endDate.setHours(23, 59, 59, 999);
+    
+    query.createdAt = {
+      $gte: startDate,
+      $lte: endDate
+    };
+  }
+
+  const records = await Record.find(query)
     .populate('partner', 'name email')
     .populate('product', 'name credits')
+    .populate('employee', 'name username')
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
 
-  const total = await Record.countDocuments();
+  const total = await Record.countDocuments(query);
   const totalPages = Math.ceil(total / limit);
 
   const response = {

@@ -4,6 +4,7 @@ import productRoutes from './productRoutes';
 import recordRoutes from './recordRoutes';
 import employeeRoutes from './employeeRoutes';
 import authRoutes from './authRoutes';
+import contractRoutes from './contractRoutes';
 
 const router = express.Router();
 
@@ -13,6 +14,7 @@ router.use('/partners', partnerRoutes);
 router.use('/products', productRoutes);
 router.use('/records', recordRoutes);
 router.use('/employees', employeeRoutes);
+router.use('/contract', contractRoutes);
 
 // Ruta de salud de la API
 router.get('/health', (req, res) => {
